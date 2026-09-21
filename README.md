@@ -125,14 +125,8 @@ Add Python to PATH
 ## 2. Clone the Repository
 
 ```bash
-git clone https://github.com/<YOUR-GITHUB-USERNAME>/RF-DETR-Waste-Detection.git
+git clone [https://github.com/Its-Himakiran/RF-DETR-Waste-Detection.git](https://github.com/Its-Himakiran/RF-DETR-Waste-Detection.git)
 cd RF-DETR-Waste-Detection
-```
-
-Replace `<YOUR-GITHUB-USERNAME>` with your GitHub username.
-
-Alternatively, download the repository as a ZIP, extract it, and open a terminal inside the project folder.
-
 ---
 
 ## 3. Create & Activate Virtual Environment
