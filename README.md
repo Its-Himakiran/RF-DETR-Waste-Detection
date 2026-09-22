@@ -1,84 +1,262 @@
 # RF-DETR: Multi-Class Waste Detection Using a Transformer Framework Based on DINOv2 with Real-World Field Validation
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg)](https://pytorch.org/)
-[![Backbone DINOv2](https://img.shields.io/badge/Backbone-DINOv2--Medium-success.svg)](https://github.com/facebookresearch/dinov2)
-[![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-FF4B4B.svg)](https://streamlit.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+**DR. RVR NRI INSTITUTE OF TECHNOLOGY DEEMED TO BE UNIVERSITY**
+*Department of Computer Science and Engineering*
 
-An end-to-end vision transformer pipeline for solid waste localization and multi-class categorization. The framework uses **RF-DETR-Medium (Receptive-Field Detection Transformer)** with a self-supervised **DINOv2-Medium** backbone and supports real-world field image inference through an interactive Streamlit application.
+A deep learning vision transformer system for multi-class environmental waste detection using **RF-DETR-Medium** powered by a self-supervised **DINOv2** backbone.
 
-The models are trained and evaluated independently on **TACO v3 (10 classes)** and **MultipleWaste v3 (24 classes)** without merging their class taxonomies.
+The project covers end-to-end model training, empirical held-out benchmark evaluations across two distinct taxonomies (10-class and 24-class), real-world GPS-tagged field validation at an uncontrolled disposal site in Tallamudi, Andhra Pradesh, and an interactive Streamlit web dashboard for real-time inference.
 
 ---
 
-## 📊 Benchmark & Validation Results
+## 📌 Project Overview
 
-All evaluations were conducted on held-out validation sets using an operating input resolution of **704 × 704 px**.
+Solid Waste Management (SWM) is one of the most critical environmental challenges facing rapidly urbanizing regions. Traditional automated sorting pipelines rely heavily on convolutional detectors (such as YOLO variants and Faster R-CNN), which often experience performance degradation as taxonomies scale beyond 10 categories or when dealing with visual clutter and deformed objects.
 
-| Study | Detector | Dataset | Classes | mAP@50 | mAP@50:95 |
-|:---|:---|:---|---:|---:|---:|
-| **This Work** | **RF-DETR-Medium** | **TACO v3** | **10** | **52.5** | **41.9** |
-| **This Work** | **RF-DETR-Medium** | **MultipleWaste v3** | **24** | **79.4** | **69.9** |
+This project implements **RF-DETR (Real-Time Detection Transformer)**, integrating self-supervised visual representations from **DINOv2** for multi-class waste localization and classification without hand-designed components like anchor generators or Non-Maximum Suppression (NMS).
+
+### Main Components
+
+* **RF-DETR-Medium Architecture:** End-to-end transformer detector leveraging a frozen/fine-tuned self-supervised DINOv2 backbone.
+* **Dual Waste Taxonomies:**
+
+  * **TACO v3:** 10 coarse/fine litter categories (class-imbalanced open-environment benchmark).
+  * **MultipleWaste v3:** 24 fine-grained recyclable and non-recyclable material classes.
+* **Cloud-Scale Model Training:** Independent fine-tuning protocols executed on Kaggle dual-NVIDIA T4 GPUs.
+* **Rigorous Empirical Evaluation:** Evaluated via COCO mAP@50, mAP@50:95, Precision, Recall, F1-score, and per-class AP breakdown.
+* **Real-World Uncontrolled Field Trial:** On-site validation using GPS-tagged smartphone imagery collected at a rural disposal site in Tallamudi, Andhra Pradesh, India.
+* **Interactive Streamlit Application:** Browser-based deployment supporting dual checkpoint selection, real-time bounding box rendering, confidence filtering, and inference latency telemetry.
 
 ---
 
-## 🛠️ Training Configuration
+## 🎯 Objectives
 
-Both models were fine-tuned independently using the following configuration:
+* Overcome CNN capacity limitations in complex multi-class waste scenarios (>10 classes).
+* Benchmark transferability of self-supervised DINOv2 features for solid waste detection.
+* Train and evaluate RF-DETR across both 10-class (TACO v3) and 24-class (MultipleWaste v3) corpora.
+* Conduct field validation on uncontrolled, outdoor, geo-referenced waste imagery.
+* Provide an accessible, production-ready Streamlit web interface for municipal monitoring.
 
-| Hyperparameter | Value |
-|:---|:---|
-| **Model** | RF-DETR-Medium |
-| **Framework** | PyTorch |
-| **Backbone** | DINOv2-Medium (self-supervised ViT) |
-| **Optimizer** | AdamW |
-| **Learning Rate** | 1 × 10⁻⁴ |
-| **Scheduler** | Cosine |
-| **Warm-up** | 2 epochs |
-| **Weight Decay** | 1 × 10⁻⁴ |
-| **Precision** | BF16 Mixed Precision |
-| **GPU** | 2 × NVIDIA T4 (Kaggle) |
-| **Input Resolution** | 704 × 704 px |
-| **Checkpoint Selection** | Best EMA validation mAP@50:95 |
+---
+
+## 🧠 Model Architecture
+
+RF-DETR utilizes a hybrid transformer architecture designed for real-time throughput while maintaining global contextual attention.
+
+```text
+Input Waste Image (704 × 704)
+          │
+          ▼
+DINOv2 Self-Supervised Vision Transformer Backbone (ViT-Medium)
+          │
+          ▼
+Multi-Scale Feature Projector & Lightweight Deformable Encoder
+          │
+          ▼
+Transformer Decoder (Object Queries + Cross-Attention)
+          │
+          ▼
+Bipartite Hungarian Matching (End-to-End, No NMS)
+          │
+          ▼
+Detected Waste Objects
+      ├── Class Label (10-Class TACO / 24-Class MultipleWaste)
+      ├── Bounding Box [x_min, y_min, x_max, y_max]
+      └── Detection Confidence Score
+```
+
+---
+
+## 🗂️ Datasets & Taxonomies
+
+The framework evaluates detection resilience across two distinct benchmark corpora.
+
+### 1. TACO v3 — 10 Classes
+
+**Categories:**
+
+* Bottle
+* Bottle cap
+* Can
+* Cigarette
+* Cup
+* Lid
+* Other
+* Plastic bag and wrapper
+* Pop tab
+* Straw
+
+**Dataset Characteristics:**
+
+* Training images: **3,561**
+* Training annotations: **11,462**
+* Validation images: **150**
+* Test images: **149**
+* Test annotations: **443**
+
+**Source:** TACO YOLO 10-Class Dataset on Roboflow Universe
+
+---
+
+### 2. MultipleWaste v3 — 24 Classes
+
+**Categories:**
+
+* Cardboard
+* Carton packaging
+* Cigarette
+* Clean paper
+* Clear plastic
+* Contaminated paper
+* Food packaging
+* Food scraps
+* Glass
+* Medical waste
+* Metal
+* Paper bag
+* Paper cup
+* Plastic bottle
+* Plastic container
+* Plastic cup
+* Plastic lid
+* Plastic packaging
+* Plastic utensil
+* Printed cardboard
+* Sanitary waste
+* Straw
+* Styrofoam
+* Wood
+
+**Dataset Characteristics:**
+
+* Training images: **2,199**
+* Training annotations: **9,737**
+* Validation images: **18**
+* Test images: **48**
+* Test annotations: **293**
+
+**Source:** Multiple Waste Dataset on Roboflow Universe
+
+---
+
+## ☁️ Kaggle Training, Checkpoints & Artifacts
+
+All models were trained using **PyTorch** and **PyTorch Lightning** on **2× NVIDIA Tesla T4 GPUs** with **bf16-mixed precision**.
+
+### Kaggle Training Notebooks
+
+* **MultipleWaste v3 (24 Classes):** View Kaggle Training Notebook
+* **TACO v3 (10 Classes):** View Kaggle Training Notebook
+
+### Trained Model Weights
+
+Due to GitHub file size limits (>100 MB), model checkpoints (`.pth`) are not committed directly to this repository.
+
+You can obtain them directly from the **Output** section of each Kaggle notebook:
+
+```text
+multiwaste_rfdetr.pth
+```
+
+Source:
+
+```text
+rfdetr_out/checkpoint_best_regular.pth
+```
+
+from the MultipleWaste notebook.
+
+For TACO:
+
+```text
+taco_rfdetr.pth
+```
+
+Source:
+
+```text
+rfdetr_out/checkpoint_best_regular.pth
+```
+
+from the TACO notebook.
+
+Place both `.pth` files inside the `models/` directory prior to running the local application.
+
+---
+
+## 📊 Evaluation & Empirical Results
+
+### Quantitative Benchmark Comparison
+
+| Dataset          | Detector       | Classes | Input Size | mAP@50 (%) | mAP@50:95 (%) | Test Recall (%) |
+| ---------------- | -------------- | ------: | ---------- | ---------: | ------------: | --------------: |
+| TACO v3          | RF-DETR-Medium |      10 | 704 × 704  |      52.5% |         41.9% |           68.2% |
+| MultipleWaste v3 | RF-DETR-Medium |      24 | 704 × 704  |      79.4% |         69.9% |           84.4% |
+
+### Confusion Matrix Performance
+
+**MultipleWaste v3 @ Confidence > 0.25**
+
+* **Overall Precision:** 78.6%
+* **Overall Recall:** 84.4%
+* **Overall F1-Score:** 81.4%
+* **Correct Matches:** 228 of 293 ground-truth targets (diagonal accuracy)
+
+Complete training loss trajectories, PR curves, and per-class confusion matrices are available in the `Results/` directory.
 
 ---
 
 ## 🚀 Application & Key Features
 
-- **Transformer Architecture:** End-to-end RF-DETR detection with bipartite matching.
-- **On-Demand Inference:** Detection runs when the user clicks **`⚡ Detect Waste`**.
-- **Both (Comparison):** Side-by-side inference using TACO v3 and MultipleWaste v3 models.
-- **TACO RF-DETR:** Detection using the 10-class TACO v3 model.
-- **MultipleWaste RF-DETR:** Detection using the 24-class MultipleWaste v3 model.
-- **Real-Time Analytics:** Object counts, confidence scores, and inference latency.
-- **Confidence Filtering:** Adjustable threshold from **0.05 to 1.00**.
-- **Batch Processing:** Supports multiple images and ZIP archives.
-- **Supported Images:** `.jpg`, `.jpeg`, `.png`, `.bmp`.
-- **Real-World Inference:** Supports detection on user-uploaded field images.
+### Dual-Model Switching
+
+Toggle between the **TACO (10-class)** and **MultipleWaste (24-class)** models on the fly.
+
+### Multi-Object Localization
+
+Detects multiple overlapping litter items within a single high-resolution image.
+
+### Real-Time Confidence Filtering
+
+Dynamic threshold slider from **0.00 – 1.00** to eliminate low-confidence false positives.
+
+### Per-Class Category Counts
+
+Summarizes detected material types and overall category distribution.
+
+### Inference Speed Monitoring
+
+Displays backend vision transformer latency in milliseconds.
+
+### Image Export
+
+Download annotated images with labeled bounding boxes directly from the browser.
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-WasteDetectionApp/
-│
-├── .streamlit/
-│   └── config.toml
+RF-DETR-Waste-Detection/
 │
 ├── core/
 │   ├── __init__.py
 │   └── detector.py
 │
 ├── models/
-│   ├── taco_rfdetr.pth
 │   ├── multiwaste_rfdetr.pth
-│   └── README.md
+│   └── taco_rfdetr.pth
 │
 ├── Results/
-│   ├── taco-rfdetr-v3-MEDIUM 704PX/
-│   └── multiwaste_v3-MEDIUM 704 PX/
+│   ├── multiwaste_v3-MEDIUM 704 PX/
+│   │   ├── confusion_matrix.png
+│   │   ├── F1_curve.png
+│   │   └── PR_curve.png
+│   │
+│   └── taco-rfdetr-v3-MEDIUM 704 PX/
+│       ├── confusion_matrix.png
+│       ├── F1_curve.png
+│       └── PR_curve.png
 │
 ├── app.py
 ├── requirements.txt
@@ -86,52 +264,52 @@ WasteDetectionApp/
 └── README.md
 ```
 
+### File Descriptions
+
+| File / Directory   | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `core/`            | Core inference functionality                              |
+| `core/detector.py` | Inference pipeline and model wrapper                      |
+| `models/`          | Trained RF-DETR model checkpoints                         |
+| `Results/`         | Evaluation plots and performance results                  |
+| `app.py`           | Interactive Streamlit web interface                       |
+| `requirements.txt` | Project dependencies                                      |
+| `.gitignore`       | Git exclusions such as `.venv`, `.pth`, and `__pycache__` |
+| `README.md`        | System documentation                                      |
+
 ---
 
-# ⚙️ Installation & Setup
+## ⚙️ Installation & Setup
 
-Follow these steps to run the project on Windows, macOS, or Linux.
+### 1. Prerequisites
 
-## 1. Prerequisites
+Make sure the following are installed:
 
-Install:
+* Python **3.10 or higher**
+* Git
+* NVIDIA GPU with CUDA support *(recommended for low-latency inference; CPU is also supported)*
 
-- **Python 3.10 or higher**
-- **Git**
-- Internet connection for package installation
-
-Check Python:
+### Verify Your Environment
 
 ```bash
 python --version
-```
-
-Check Git:
-
-```bash
 git --version
 ```
 
-### Windows
+---
 
-During Python installation, enable:
+### 2. Clone the Repository
 
-```text
-Add Python to PATH
+```bash
+git clone https://github.com/Its-Himakiran/RF-DETR-Waste-Detection.git
+cd RF-DETR-Waste-Detection
 ```
 
 ---
 
-## 2. Clone the Repository
+### 3. Create & Activate Virtual Environment
 
-```bash
-git clone [https://github.com/Its-Himakiran/RF-DETR-Waste-Detection.git](https://github.com/Its-Himakiran/RF-DETR-Waste-Detection.git)
-cd RF-DETR-Waste-Detection
----
-
-## 3. Create & Activate Virtual Environment
-
-### Windows PowerShell
+#### Windows PowerShell
 
 ```powershell
 python -m venv .venv
@@ -139,277 +317,219 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 .\.venv\Scripts\Activate.ps1
 ```
 
-### Windows CMD
+#### Windows Command Prompt (CMD)
 
 ```cmd
 python -m venv .venv
 .\.venv\Scripts\activate.bat
 ```
 
-### macOS / Linux
+#### macOS / Linux
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-After activation, the terminal should show:
-
-```text
-(.venv)
-```
-
 ---
 
-## 4. Install Dependencies
+### 4. Install Dependencies
 
-With `(.venv)` activated:
+Upgrade pip:
 
 ```bash
 python -m pip install --upgrade pip
+```
+
+Install project dependencies:
+
+```bash
 pip install -r requirements.txt
-pip install rfdetr supervision
-```
-
-Verify RF-DETR:
-
-```bash
-pip show rfdetr
 ```
 
 ---
 
-## 5. Add Model Checkpoints
+### 5. Download Model Checkpoints
 
-Place the trained model weights inside the `models/` directory:
+Download the trained weights from the Kaggle notebooks and place them inside the `models/` directory.
+
+The directory should contain:
 
 ```text
 models/
-├── taco_rfdetr.pth
-└── multiwaste_rfdetr.pth
+├── multiwaste_rfdetr.pth
+└── taco_rfdetr.pth
 ```
-
-The filenames must match **exactly**:
-
-```text
-taco_rfdetr.pth
-multiwaste_rfdetr.pth
-```
-
-These large `.pth` files may be distributed separately through GitHub Releases, Git LFS, or cloud storage.
 
 ---
 
-# 🖥️ Running the Application
+## 🖥️ Running the Application
 
-Make sure the terminal is inside the project directory and `(.venv)` is active.
-
-Run:
+Ensure your virtual environment is active, then run:
 
 ```bash
 streamlit run app.py
 ```
 
-Streamlit will display:
+Streamlit will open the application in your browser.
 
 ```text
-You can now view your Streamlit app in your browser.
-
 Local URL: http://localhost:8501
-Network URL: http://192.168.x.x:8501
-```
-
-Open:
-
-```text
-http://localhost:8501
-```
-
-If the browser does not open automatically, copy the local URL into Chrome, Edge, or Firefox.
-
----
-
-# 🎯 How to Use
-
-### 1. Select Detection Mode
-
-Choose one:
-
-```text
-Both (Comparison)
-TACO RF-DETR
-MultipleWaste RF-DETR
-```
-
-### 2. Set Confidence Threshold
-
-Adjust the confidence threshold:
-
-```text
-Minimum: 0.05
-Maximum: 1.00
-Default: 0.50
-```
-
-### 3. Upload Images
-
-Upload:
-
-```text
-.jpg
-.jpeg
-.png
-.bmp
-```
-
-You can also upload a `.zip` file containing multiple images.
-
-### 4. Run Detection
-
-Click:
-
-```text
-⚡ Detect Waste
-```
-
-### 5. View Results
-
-The application displays:
-
-- Bounding boxes
-- Waste class labels
-- Confidence scores
-- Per-class object counts
-- Total detections
-- Mean prediction confidence
-- Inference latency in milliseconds
-
----
-
-# 🔧 Troubleshooting
-
-### `No module named 'rfdetr'`
-
-Install RF-DETR inside the active virtual environment:
-
-```bash
-pip install rfdetr
 ```
 
 ---
 
-### `No module named 'supervision'`
+## 🎯 How to Use
+
+### Step 1 — Launch the Dashboard
 
 Run:
-
-```bash
-pip install supervision
-```
-
----
-
-### `File does not exist: app.py`
-
-Make sure the terminal is inside the project directory containing `app.py`:
-
-```bash
-cd WasteDetectionApp
-```
-
-Then run:
 
 ```bash
 streamlit run app.py
 ```
 
----
+### Step 2 — Select Model Checkpoint
 
-### `running scripts is disabled on this system`
+In the sidebar, choose between:
 
-In Windows PowerShell:
+* **MultipleWaste v3 (24 Classes)**
+* **TACO v3 (10 Classes)**
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
-.\.venv\Scripts\Activate.ps1
-```
+### Step 3 — Set Confidence Threshold
 
----
+Adjust the confidence threshold slider.
 
-### `TracerWarning: Converting a tensor...`
-
-This is a PyTorch runtime warning that may occur during model tracing. If the application starts and inference works correctly, it is not a fatal error.
-
----
-
-### `args.num_queries absent; inferred ckpt_num_queries=300`
-
-RF-DETR may display:
+Recommended range:
 
 ```text
-args.num_queries absent; inferred ckpt_num_queries=300
+0.25 – 0.40
 ```
 
-If the model loads successfully and the application runs normally, this is a configuration warning rather than a fatal error.
+### Step 4 — Upload Image
+
+Upload any:
+
+* `.jpg`
+* `.jpeg`
+* `.png`
+
+outdoor scene or litter photograph.
+
+### Step 5 — Inspect Detections
+
+Review:
+
+* Predicted bounding boxes
+* Category labels
+* Object summary counts
+* Inference latency
+
+### Step 6 — Download Output
+
+Click **Download Result** to save the labeled image.
 
 ---
 
-### `Checkpoint not found`
+## 🔧 Troubleshooting
 
-Verify that both trained checkpoints exist:
+### Error: `ModuleNotFoundError: No module named 'rfdetr'`
+
+Ensure the virtual environment is active and install RF-DETR:
+
+```bash
+pip install "rfdetr[train,loggers]"
+```
+
+---
+
+### Error: `FileNotFoundError: models/multiwaste_rfdetr.pth`
+
+Verify that the `.pth` files are downloaded from Kaggle and placed directly inside the `models/` directory.
+
+The filenames must exactly match:
 
 ```text
-models/
-├── taco_rfdetr.pth
-└── multiwaste_rfdetr.pth
+multiwaste_rfdetr.pth
+taco_rfdetr.pth
 ```
-
-Make sure the filenames are spelled exactly as shown.
 
 ---
 
-### Port 8501 Already in Use
+### Error: Port 8501 Is Already in Use
 
-Run Streamlit on another port:
+Launch Streamlit on a secondary port:
 
 ```bash
 streamlit run app.py --server.port 8502
 ```
 
-Then open:
+---
 
-```text
-http://localhost:8502
-```
+## 🧰 Technology Stack
+
+### Core Framework
+
+* Python 3.10+
+* PyTorch
+* Torchvision
+
+### Model Family
+
+* RF-DETR (Real-Time Detection Transformer)
+* DINOv2 (Meta AI)
+
+### Application & Deployment
+
+* Streamlit
+* Supervision
+* OpenCV
+* Pillow
+
+### Hardware & Cloud
+
+* Kaggle
+* 2× NVIDIA Tesla T4 GPUs
+* Roboflow Universe
 
 ---
 
-# 📈 Results Directory
+## 📚 Project Resources
 
-Evaluation outputs are stored under:
+### GitHub Repository
 
-```text
-Results/
-├── taco-rfdetr-v3-MEDIUM 704PX/
-└── multiwaste_v3-MEDIUM 704 PX/
-```
+**Its-Himakiran/RF-DETR-Waste-Detection**
 
-These directories may contain:
+### Kaggle Notebooks
 
-- Precision-recall curves
-- Confusion matrices
-- Evaluation results
-- Training/evaluation logs
+* **MultipleWaste:** `multiplewaste-rfdetr-wastedetection`
+* **TACO:** `taco-rfdetr-v3-retrain`
 
----
+### Roboflow Datasets
 
-# 🧰 Technology Stack
-
-**Python · PyTorch · RF-DETR · DINOv2 · Supervision · Streamlit · OpenCV · NumPy · Kaggle**
+* **TACO:** `taco-yolo-10-class-original` (v4)
+* **MultipleWaste:** `multiple-waste-dataset` (v8)
 
 ---
 
-# 📄 License
+## 👨‍💻 Authors
 
-This project is released under the **MIT License**.
+**Mustina Hima Kiran**
+**Nagaraju Shyam Vara Prasad Raju**
+**Karnikula Mourya Mahesh**
+**Mohammad Amman Fawaz**
+**Lakshmi Raj Ravi**
+**Dr. K. V. Sambasiva Rao** — Director, Research & Development
 
-See the `LICENSE` file for the complete license text.
+**Department of Computer Science and Engineering**
+**DR. RVR NRI INSTITUTE OF TECHNOLOGY DEEMED TO BE UNIVERSITY**
+
+**Academic Period:** 2023–2027
+
+---
+
+## 📄 License
+
+This repository is distributed under the **MIT License**.
+
+See the [`LICENSE`](LICENSE) file for further details.
