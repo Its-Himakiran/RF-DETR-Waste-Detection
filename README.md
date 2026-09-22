@@ -518,10 +518,15 @@ streamlit run app.py --server.port 8502
 ## 👨‍💻 Authors
 
 **Mustina Hima Kiran**
+
 **Nagaraju Shyam Vara Prasad Raju**
+
 **Karnikula Mourya Mahesh**
+
 **Mohammad Amman Fawaz**
+
 **Lakshmi Raj Ravi**
+
 **Dr. K. V. Sambasiva Rao** — Director, Research & Development
 
 **Department of Computer Science and Engineering**
