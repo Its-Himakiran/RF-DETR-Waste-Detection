@@ -517,17 +517,17 @@ streamlit run app.py --server.port 8502
 
 ## 👨‍💻 Authors
 
-**Mustina Hima Kiran**
+**1.Mustina Hima Kiran(Main Author)**
 
-**Nagaraju Shyam Vara Prasad Raju**
+**2.Nagaraju Shyam Vara Prasad Raju**
 
-**Karnikula Mourya Mahesh**
+**3.Karnikula Mourya Mahesh**
 
-**Mohammad Amman Fawaz**
+**4.Mohammad Amman Fawaz**
 
-**Lakshmi Raj Ravi**
+**5.Lakshmi Raj Ravi**
 
-**Dr. K. V. Sambasiva Rao** — Director, Research & Development
+**6.Dr. K. V. Sambasiva Rao** — Director, Research & Development
 
 **Department of Computer Science and Engineering**
 **DR. RVR NRI INSTITUTE OF TECHNOLOGY DEEMED TO BE UNIVERSITY**
