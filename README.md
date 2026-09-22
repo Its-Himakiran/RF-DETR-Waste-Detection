@@ -146,7 +146,10 @@ All models were trained using **PyTorch** and **PyTorch Lightning** on **2× NVI
 ### Kaggle Training Notebooks
 
 * **MultipleWaste v3 (24 Classes):** View Kaggle Training Notebook
+  https://www.kaggle.com/code/hiamkiran/multiplewaste-rfdetr-wastedetection
+  
 * **TACO v3 (10 Classes):** View Kaggle Training Notebook
+  https://www.kaggle.com/code/himakiran143/taco-rfdetr-v3-retrain
 
 ### Trained Model Weights
 
